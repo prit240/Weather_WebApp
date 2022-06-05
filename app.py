@@ -1,44 +1,49 @@
-from flask import Flask, render_template, request
-
-# import json to load JSON data to a python dictionary
-import json
-
-# urllib.request to make a request to api
-import urllib.request
-
+#make a virtual envirnment and install all the module 
+#import the flask module
+from flask import Flask,render_template,request
+import requests
 
 app = Flask(__name__)
 
-@app.route('/', methods =['POST', 'GET'])
-def weather():
-	if request.method == 'POST':
-		city = request.form['city']
-	else:
-		# for default name mathura
-		city = 'mathura'
-
-	# your API key will come here
-	api = 8f6dd305a4a31f6a8c47276be2a2ea58
-
-	# source contain json data from api
-	source = urllib.request.urlopen('http://api.openweathermap.org/data/2.5/weather?q =' + city + '&appid =' + api).read()
-
-	# converting JSON data to a dictionary
-	list_of_data = json.loads(source)
-
-	# data for variable list_of_data
-	data = {
-		"country_code": str(list_of_data['sys']['country']),
-		"coordinate": str(list_of_data['coord']['lon']) + ' '
-					+ str(list_of_data['coord']['lat']),
-		"temp": str(list_of_data['main']['temp']) + 'k',
-		"pressure": str(list_of_data['main']['pressure']),
-		"humidity": str(list_of_data['main']['humidity']),
-	}
-	print(data)
-	return render_template('index.html', data = data)
+#make a route and render all the html templates in this route
+@app.route('/', methods=["GET", "POST"])
+def index():
+    weatherData = ''
+    error = 0
+    cityNname = ''
+    if request.method == "POST":
+        cityNname = request.form.get("cityName")
+        if cityNname:
+            weatherApiKey = 'bb25b11cb84453798ec30423ea03638f'
+            url = "https://api.openweathermap.org/data/2.5/weather?q="+cityNname+"&appid=" + weatherApiKey 
+            weatherData = requests.get(url).json()
+        else:
+            error = 1
 
 
+    return render_template('index.html',data = weatherData, cityNname = cityNname, error = error)
+     
+        #take a variable to show the json data
+        #r = requests.get('https://api.openweathermap.org/data/2.5/weather?q='+city_name+'&appid=bb25b11cb84453798ec30423ea03638f')
 
-if __name__ == '__main__':
-	app.run(debug = True)
+        #read the json object
+        #json_object = r.json()
+        #print(json_object)
+        #take some attributes like temperature,humidity,pressure of this 
+        #temperature = int(json_object["main"]["temp"]) #this temparetuure in kelvin
+        #humidity = int(r.json()['main']['humidity'])
+        #pressure = int(r.json()['main']['pressure'])
+        #wind = int(r.json()['wind']['speed'])
+
+        #atlast just pass the variables
+        #condition = r.json()['weather'][0]['main']
+        #desc = r.json()['weather'][0]['description']
+        
+        #return render_template('index.html',data=data)
+    #else:
+        #return render_template('index.html',data=data) 
+
+
+if __name__ == "__main__":
+    #app.run(debug=True)
+    app.run()
